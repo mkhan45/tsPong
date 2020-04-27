@@ -28,7 +28,7 @@ class GameState {
 
    mouseX: number;
    mouseY: number;
-   pressed_keys: string[];
+   pressed_keys: Set<string>;
 
    constructor() {
       this.lPaddle = new Rectangle(20, 400, 20, 40);
@@ -40,7 +40,7 @@ class GameState {
 
       this.mouseX = 0;
       this.mouseY = 0;
-      this.pressed_keys = [];
+      this.pressed_keys = new Set();
    }
 
    public gameLoop = () => {
@@ -82,15 +82,11 @@ class GameState {
    }
 
    public handleKeyDown = (event: KeyboardEvent) => {
-      this.pressed_keys.push(event.key);
+      this.pressed_keys.add(event.key);
    }
 
    public handleKeyUp = (event: KeyboardEvent) => {
-      // remove it from the pressed_keys array
-      let index = this.pressed_keys.indexOf(event.key, 0);
-      if (index != -1) {
-         this.pressed_keys.splice(index, 1);
-      }
+      this.pressed_keys.delete(event.key)
    }
 }
 

@@ -1,0 +1,11 @@
+{
+   "name": "pong",
+   "version": "0.1.0",
+   "description": "Pong",
+   "compilerOptions":{
+      "target":"es6"
+   },
+   "files": [
+      "gameScript.ts"
+   ]
+}
