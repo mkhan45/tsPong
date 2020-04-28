@@ -24,38 +24,19 @@ Once the connection is made run p.send("whatever") in the console and it will be
         white-space: normal;
       }
     </style>
-    <form>
-      <textarea id="incoming"></textarea>
-      <button type="submit">submit</button>
+    <form id="connectForm">
+       <textarea id="incoming" style="width:60%; height:15em;"></textarea>
+       <button type="submit">submit</button>
+    </form>
+
+    <br>
+
+    <form id="messageForm">
+       <textarea id="outMessage"></textarea>
+       <button type="submit">send</button>
     </form>
     <pre id="outgoing"></pre>
     <script src="simplepeer.min.js"></script>
-    <script>
-      const p = new SimplePeer({
-        initiator: location.hash === '#1',
-        trickle: false
-      })
-
-      p.on('error', err => console.log('error', err))
-
-      p.on('signal', data => {
-        console.log('SIGNAL', JSON.stringify(data))
-        document.querySelector('#outgoing').textContent = JSON.stringify(data)
-      })
-
-      document.querySelector('form').addEventListener('submit', ev => {
-        ev.preventDefault()
-        p.signal(JSON.parse(document.querySelector('#incoming').value))
-      })
-
-      p.on('connect', () => {
-        console.log('CONNECT')
-        p.send('whatever' + Math.random())
-      })
-
-      p.on('data', data => {
-        console.log('data: ' + data)
-      })
-    </script>
-  </body>
+    <script src="chatClient.js"></script>
+   </body>
 </html>
