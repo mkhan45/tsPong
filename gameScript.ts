@@ -1,23 +1,4 @@
-class Rectangle {
-   x: number;
-   y: number;
-   width: number;
-   height: number;
-
-   constructor(x: number, y: number, w: number, h: number) {
-      this.x = x;
-      this.y = y;
-      this.width = w;
-      this.height = h;
-   }
-
-   public overlaps(other: Rectangle) {
-      return this.x < other.x + other.width &&
-               this.x + this.width > other.x &&
-               this.y < other.y + other.height &&
-               this.y + this.height > other.y
-   }
-}
+import { Rectangle } from "./gameData"
 
 class GameState {
    canvas: HTMLCanvasElement;
@@ -90,11 +71,10 @@ class GameState {
    }
 }
 
-let pressed_keys: string[];
-
 let game_state = new GameState();
 
 document.onmousemove = game_state.handleMouseMove;
 document.onkeydown = game_state.handleKeyDown;
 document.onkeyup = game_state.handleKeyUp;
+
 setInterval(game_state.gameLoop, 16);

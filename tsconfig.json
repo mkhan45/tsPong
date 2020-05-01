@@ -6,6 +6,8 @@
       "target":"es6"
    },
    "files": [
-      "gameScript.ts"
+      "gameData.ts",
+      "pongClient.ts",
+      "pongServer.ts"
    ]
 }
