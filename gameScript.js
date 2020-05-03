@@ -24,6 +24,7 @@ var iceServers = [
     'stun:stun2.l.google.com:19302',
     'stun:stun3.l.google.com:19302',
     'stun:stun4.l.google.com:19302',
+    'stun:stun.sipnet.net:3478',
 ].map(function (url) {
     return { urls: url };
 });
@@ -56,6 +57,10 @@ var Rectangle = /** @class */ (function () {
         this.width = w;
         this.height = h;
     }
+    Rectangle.prototype.translate = function (x_vel, y_vel) {
+        this.x += x_vel;
+        this.y += y_vel;
+    };
     Rectangle.prototype.overlaps = function (other) {
         return this.x < other.x + other.width &&
             this.x + this.width > other.x &&
@@ -73,9 +78,9 @@ var GameData = /** @class */ (function () {
         this.handleKeyUp = function (event) {
             _this.pressed_keys.delete(event.key);
         };
-        this.lPaddle = new Rectangle(20, 400, 20, 40);
-        this.rPaddle = new Rectangle(470, 400, 20, 40);
-        this.ball = new Rectangle(240, 240, 20, 20);
+        this.lPaddle = new Rectangle(20, 400, 10, 60);
+        this.rPaddle = new Rectangle(470, 400, 10, 60);
+        this.ball = new Rectangle(240, 240, 10, 10);
         this.pressed_keys = new Set();
     }
     return GameData;
@@ -85,10 +90,39 @@ var GameInstance = /** @class */ (function () {
         var _this = this;
         this.gameLoop = function () {
             _this.draw();
+            if (_this.running) {
+                _this.game_data.ball.translate(_this.ball_x_vel, _this.ball_y_vel);
+                if (_this.game_data.ball.x < 0 && _this.ball_x_vel < 0) {
+                    _this.game_data.ball.x = 0;
+                    _this.ball_x_vel *= -1;
+                }
+                if (_this.game_data.ball.x > 500 - _this.game_data.ball.width && _this.ball_x_vel > 0) {
+                    _this.game_data.ball.x = 500 - _this.game_data.ball.width;
+                    _this.ball_x_vel *= -1;
+                }
+                if (_this.game_data.ball.y < 0 && _this.ball_y_vel < 0) {
+                    _this.game_data.ball.y = 0;
+                    _this.ball_y_vel *= -1;
+                }
+                if (_this.game_data.ball.y > 500 - _this.game_data.ball.height && _this.ball_y_vel > 0) {
+                    _this.game_data.ball.y = 500 - _this.game_data.ball.height;
+                    _this.ball_y_vel *= -1;
+                }
+                if ((_this.game_data.ball.overlaps(_this.game_data.lPaddle) && _this.ball_x_vel < 0)
+                    || (_this.game_data.ball.overlaps(_this.game_data.rPaddle) && _this.ball_x_vel > 0))
+                    _this.ball_x_vel *= -1;
+            }
         };
         this.game_data = new GameData();
         this.canvas = document.getElementById("gameCanvas");
         this.ctx = this.canvas.getContext("2d");
+        this.running = false;
+        this.ball_x_vel = Math.random() * 3.0 + 3.0;
+        this.ball_y_vel = Math.random() * 3.0 + 3.0;
+        if (Math.random() > 0.5)
+            this.ball_x_vel *= -1;
+        if (Math.random() > 0.5)
+            this.ball_y_vel *= -1;
     }
     GameInstance.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -124,6 +158,7 @@ function setupConnections(p) {
     });
     p.on('connect', function () {
         console.log('CONNECTED');
+        game_instance.running = true;
     });
 }
 function startServer() {
@@ -138,23 +173,25 @@ function startServer() {
         client_keys = new Set(JSON.parse(data));
     });
     var gameLoop = function () {
-        game_instance.draw();
-        var pressed_keys = new Set(__spread(client_keys, game_instance.game_data.pressed_keys));
-        pressed_keys.forEach(function (key) {
-            if (key == "w") {
-                game_instance.game_data.lPaddle.y -= 5;
-            }
-            else if (key == "s") {
-                game_instance.game_data.lPaddle.y += 5;
-            }
-            if (key == "ArrowUp") {
-                game_instance.game_data.rPaddle.y -= 5;
-            }
-            else if (key == "ArrowDown") {
-                game_instance.game_data.rPaddle.y += 5;
-            }
-        });
-        p.send(JSON.stringify(game_instance.game_data));
+        game_instance.gameLoop();
+        if (game_instance.running) {
+            var pressed_keys = new Set(__spread(client_keys, game_instance.game_data.pressed_keys));
+            pressed_keys.forEach(function (key) {
+                if (key == "w") {
+                    game_instance.game_data.lPaddle.y -= 5;
+                }
+                else if (key == "s") {
+                    game_instance.game_data.lPaddle.y += 5;
+                }
+                if (key == "ArrowUp") {
+                    game_instance.game_data.rPaddle.y -= 5;
+                }
+                else if (key == "ArrowDown") {
+                    game_instance.game_data.rPaddle.y += 5;
+                }
+            });
+            p.send(JSON.stringify(game_instance.game_data));
+        }
     };
     setInterval(gameLoop, 16);
 }
@@ -163,6 +200,7 @@ function startClient() {
         initiator: false,
         trickle: false,
         config: { iceServers: iceServers },
+        reconnectTimer: 15000,
     });
     setupConnections(p);
     p.on('data', function (data) {

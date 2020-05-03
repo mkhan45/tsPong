@@ -6,6 +6,7 @@ let iceServers: {urls : string}[] = [
    'stun:stun2.l.google.com:19302',
    'stun:stun3.l.google.com:19302',
    'stun:stun4.l.google.com:19302',
+   'stun:stun.sipnet.net:3478',
 ].map((url: string) => {
    return { urls: url };
 });
@@ -47,6 +48,11 @@ class Rectangle {
       this.height = h;
    }
 
+   public translate(x_vel: number, y_vel: number) {
+      this.x += x_vel;
+      this.y += y_vel;
+   }
+
    public overlaps(other: Rectangle) {
       return this.x < other.x + other.width &&
          this.x + this.width > other.x &&
@@ -63,9 +69,9 @@ class GameData {
    pressed_keys: Set<string>;
 
    constructor() {
-      this.lPaddle = new Rectangle(20, 400, 20, 40);
-      this.rPaddle = new Rectangle(470, 400, 20, 40);
-      this.ball = new Rectangle(240, 240, 20, 20);
+      this.lPaddle = new Rectangle(20, 400, 15, 60);
+      this.rPaddle = new Rectangle(470, 400, 15, 60);
+      this.ball = new Rectangle(240, 240, 15, 15);
       this.pressed_keys = new Set();
    }
 
@@ -84,14 +90,54 @@ class GameInstance {
    canvas: HTMLCanvasElement;
    ctx: CanvasRenderingContext2D;
 
+   running: Boolean;
+
+   ball_x_vel: number;
+   ball_y_vel: number;
+
    constructor() {
       this.game_data = new GameData();
       this.canvas = <HTMLCanvasElement> document.getElementById("gameCanvas");
       this.ctx = <CanvasRenderingContext2D> this.canvas.getContext("2d");
+      this.running = false;
+
+      this.ball_x_vel = Math.random() * 3.0 + 3.0;
+      this.ball_y_vel = Math.random() * 3.0 + 3.0;
+
+      if (Math.random() > 0.5)
+         this.ball_x_vel *= -1;
+      if (Math.random() > 0.5)
+         this.ball_y_vel *= -1;
    }
 
    public gameLoop = () => {
       this.draw();
+
+      if (this.running) {
+         this.game_data.ball.translate(this.ball_x_vel, this.ball_y_vel);
+
+         if (this.game_data.ball.x < 0 && this.ball_x_vel < 0) {
+            this.game_data.ball.x = 0;
+            this.ball_x_vel *= -1;
+         }
+         if (this.game_data.ball.x > 500 - this.game_data.ball.width && this.ball_x_vel > 0) {
+            this.game_data.ball.x = 500 - this.game_data.ball.width;
+            this.ball_x_vel *= -1
+         }
+
+         if (this.game_data.ball.y < 0 && this.ball_y_vel < 0) {
+            this.game_data.ball.y = 0;
+            this.ball_y_vel *= -1;
+         }
+         if (this.game_data.ball.y > 500 - this.game_data.ball.height && this.ball_y_vel > 0) {
+            this.game_data.ball.y = 500 - this.game_data.ball.height;
+            this.ball_y_vel *= -1
+         }
+
+         if ((this.game_data.ball.overlaps(this.game_data.lPaddle) && this.ball_x_vel < 0)
+            || (this.game_data.ball.overlaps(this.game_data.rPaddle) && this.ball_x_vel > 0))
+            this.ball_x_vel *= -1
+      }
    };
 
    public draw() {
@@ -132,6 +178,7 @@ function setupConnections(p: any) {
    })
    p.on('connect', () => {
       console.log('CONNECTED')
+      game_instance.running = true;
    })
 }
 
@@ -150,24 +197,26 @@ function startServer() {
    })
 
    let gameLoop = () => {
-      game_instance.draw()
+      game_instance.gameLoop()
 
-      let pressed_keys = new Set([...client_keys, ...game_instance.game_data.pressed_keys]);
-      pressed_keys.forEach( (key: string) => {
-         if (key == "w") {
-            game_instance.game_data.lPaddle.y -= 5;
-         } else if (key == "s") {
-            game_instance.game_data.lPaddle.y += 5;
-         }
+      if (game_instance.running) {
+         let pressed_keys = new Set([...client_keys, ...game_instance.game_data.pressed_keys]);
+         pressed_keys.forEach( (key: string) => {
+            if (key == "w") {
+               game_instance.game_data.lPaddle.y -= 10;
+            } else if (key == "s") {
+               game_instance.game_data.lPaddle.y += 10;
+            }
 
-         if (key == "ArrowUp") {
-            game_instance.game_data.rPaddle.y -= 5;
-         } else if (key == "ArrowDown") {
-            game_instance.game_data.rPaddle.y += 5;
-         }
-      });
+            if (key == "ArrowUp") {
+               game_instance.game_data.rPaddle.y -= 10;
+            } else if (key == "ArrowDown") {
+               game_instance.game_data.rPaddle.y += 10;
+            }
+         });
 
-      p.send(JSON.stringify(game_instance.game_data));
+         p.send(JSON.stringify(game_instance.game_data));
+      }
    };
 
    setInterval(gameLoop, 16);
@@ -178,7 +227,7 @@ function startClient() {
       initiator: false,
       trickle: false,
       config: {iceServers: iceServers},
-
+      reconnectTimer: 15000,
    });
    setupConnections(p);
 
