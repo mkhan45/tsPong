@@ -18,6 +18,15 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
+var iceServers = [
+    'stun:stun.l.google.com:19302',
+    'stun:global.stun.twilio.com:3478?transport=udp',
+    'stun:stun2.l.google.com:19302',
+    'stun:stun3.l.google.com:19302',
+    'stun:stun4.l.google.com:19302',
+].map(function (url) {
+    return { urls: url };
+});
 function copyOutgoing() {
     var text = document.querySelector("#outgoing");
     text.select();
@@ -121,12 +130,12 @@ function startServer() {
     var p = new SimplePeer({
         initiator: true,
         trickle: false,
+        config: { iceServers: iceServers },
     });
     setupConnections(p);
     var client_keys = new Set();
     p.on('data', function (data) {
         client_keys = new Set(JSON.parse(data));
-        console.log(client_keys);
     });
     var gameLoop = function () {
         game_instance.draw();
@@ -153,6 +162,7 @@ function startClient() {
     var p = new SimplePeer({
         initiator: false,
         trickle: false,
+        config: { iceServers: iceServers },
     });
     setupConnections(p);
     p.on('data', function (data) {

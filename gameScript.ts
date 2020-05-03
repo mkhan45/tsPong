@@ -1,5 +1,16 @@
 declare var SimplePeer: any;
 
+let iceServers: {urls : string}[] = [
+   'stun:stun.l.google.com:19302',
+   'stun:global.stun.twilio.com:3478?transport=udp',
+   'stun:stun2.l.google.com:19302',
+   'stun:stun3.l.google.com:19302',
+   'stun:stun4.l.google.com:19302',
+].map((url: string) => {
+   return { urls: url };
+});
+
+
 function copyOutgoing() {
    let text = <HTMLInputElement> document.querySelector("#outgoing");
    text.select();
@@ -7,20 +18,20 @@ function copyOutgoing() {
 }
 
 class SerializationHelper {
-    static toInstance<T>(obj: T, json: string) : T {
-        var jsonObj = JSON.parse(json);
+   static toInstance<T>(obj: T, json: string) : T {
+      var jsonObj = JSON.parse(json);
 
-        if (typeof obj["fromJSON"] === "function") {
-            obj["fromJSON"](jsonObj);
-        }
-        else {
-            for (var propName in jsonObj) {
-                obj[propName] = jsonObj[propName]
-            }
-        }
+      if (typeof obj["fromJSON"] === "function") {
+         obj["fromJSON"](jsonObj);
+      }
+      else {
+         for (var propName in jsonObj) {
+            obj[propName] = jsonObj[propName]
+         }
+      }
 
-        return obj;
-    }
+      return obj;
+   }
 }
 
 class Rectangle {
@@ -38,9 +49,9 @@ class Rectangle {
 
    public overlaps(other: Rectangle) {
       return this.x < other.x + other.width &&
-               this.x + this.width > other.x &&
-               this.y < other.y + other.height &&
-               this.y + this.height > other.y
+         this.x + this.width > other.x &&
+         this.y < other.y + other.height &&
+         this.y + this.height > other.y
    }
 }
 
@@ -128,6 +139,7 @@ function startServer() {
    const p = new SimplePeer({
       initiator: true,
       trickle: false,
+      config: {iceServers: iceServers},
    });
 
    setupConnections(p);
@@ -135,7 +147,6 @@ function startServer() {
    let client_keys: Set<string> = new Set();
    p.on('data', (data: string) => {
       client_keys = new Set(JSON.parse(data));
-      console.log(client_keys);
    })
 
    let gameLoop = () => {
@@ -166,6 +177,8 @@ function startClient() {
    const p = new SimplePeer({
       initiator: false,
       trickle: false,
+      config: {iceServers: iceServers},
+
    });
    setupConnections(p);
 
