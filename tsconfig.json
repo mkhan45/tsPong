@@ -3,11 +3,11 @@
    "version": "0.1.0",
    "description": "Pong",
    "compilerOptions":{
-      "target":"es6"
+      "lib":["ES2016", "DOM"],
+      "target":"es5",
+      "downlevelIteration":true
    },
    "files": [
-      "gameData.ts",
-      "pongClient.ts",
-      "pongServer.ts"
+      "gameScript.ts"
    ]
 }
