@@ -3,8 +3,6 @@ declare var SimplePeer: any;
 let iceServers: {urls : string}[] = [
    'stun:stun.l.google.com:19302',
    'stun:global.stun.twilio.com:3478?transport=udp',
-   'stun:stun2.l.google.com:19302',
-   'stun:stun3.l.google.com:19302',
    'stun:stun4.l.google.com:19302',
    'stun:stun.sipnet.net:3478',
 ].map((url: string) => {
@@ -66,6 +64,9 @@ class GameData {
    rPaddle: Rectangle;
    ball: Rectangle;
 
+   lscore: number;
+   rscore: number;
+
    pressed_keys: Set<string>;
 
    constructor() {
@@ -73,6 +74,9 @@ class GameData {
       this.rPaddle = new Rectangle(470, 400, 15, 60);
       this.ball = new Rectangle(240, 240, 15, 15);
       this.pressed_keys = new Set();
+
+      this.lscore = 0;
+      this.rscore = 0;
    }
 
    public handleKeyDown = (event: KeyboardEvent) => {
@@ -89,6 +93,7 @@ class GameInstance {
 
    canvas: HTMLCanvasElement;
    ctx: CanvasRenderingContext2D;
+   scoreText: HTMLPreElement;
 
    running: Boolean;
 
@@ -99,6 +104,7 @@ class GameInstance {
       this.game_data = new GameData();
       this.canvas = <HTMLCanvasElement> document.getElementById("gameCanvas");
       this.ctx = <CanvasRenderingContext2D> this.canvas.getContext("2d");
+      this.scoreText = <HTMLPreElement> document.getElementById("scoreText");
       this.running = false;
 
       this.ball_x_vel = Math.random() * 3.0 + 3.0;
@@ -117,12 +123,13 @@ class GameInstance {
          this.game_data.ball.translate(this.ball_x_vel, this.ball_y_vel);
 
          if (this.game_data.ball.x < 0 && this.ball_x_vel < 0) {
-            this.game_data.ball.x = 0;
-            this.ball_x_vel *= -1;
+            this.game_data.rscore += 1;
+            this.resetBall();
          }
+
          if (this.game_data.ball.x > 500 - this.game_data.ball.width && this.ball_x_vel > 0) {
-            this.game_data.ball.x = 500 - this.game_data.ball.width;
-            this.ball_x_vel *= -1
+            this.game_data.lscore += 1;
+            this.resetBall();
          }
 
          if (this.game_data.ball.y < 0 && this.ball_y_vel < 0) {
@@ -136,7 +143,7 @@ class GameInstance {
 
          if ((this.game_data.ball.overlaps(this.game_data.lPaddle) && this.ball_x_vel < 0)
             || (this.game_data.ball.overlaps(this.game_data.rPaddle) && this.ball_x_vel > 0))
-            this.ball_x_vel *= -1
+         this.ball_x_vel *= -1
       }
    };
 
@@ -149,10 +156,18 @@ class GameInstance {
       this.ctx.fillStyle = "#000000";
       this.ctx.fill();
       this.ctx.closePath();
+
+      this.scoreText.innerText = `Left: ${this.game_data.lscore}, Right: ${this.game_data.rscore}`;
    }
 
    public drawRect(rect: Rectangle) {
       this.ctx.rect(rect.x, rect.y, rect.width, rect.height);
+   }
+
+   public resetBall() {
+      this.game_data.ball = new Rectangle(240, 240, 15, 15);
+      this.ball_x_vel = Math.random() * 3.0 + 3.0;
+      this.ball_y_vel = Math.random() * 3.0 + 3.0;
    }
 }
 
@@ -176,8 +191,11 @@ function setupConnections(p: any) {
       ev.preventDefault()
       p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value);
    })
-   p.on('connect', () => {
+
+   //async for the Promise
+   p.on('connect', async () => {
       console.log('CONNECTED')
+      await new Promise(r => setTimeout(r, 2500)); //sleep 2500ms
       game_instance.running = true;
    })
 }
