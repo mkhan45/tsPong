@@ -242,6 +242,7 @@ function startServer() {
                 }
                 else {
                     p.signal(data);
+                    clearInterval(interval);
                 }
             },
             error: function (_jqXhr, _textStatus, errorMessage) {
@@ -249,7 +250,6 @@ function startServer() {
             }
         });
     }, 3000);
-    clearInterval(interval);
     var client_keys = new Set();
     p.on('data', function (data) {
         client_keys = new Set(JSON.parse(data));

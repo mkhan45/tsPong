@@ -231,6 +231,7 @@ function startServer() {
                console.log("no clients connected");
             } else {
                p.signal(data);
+               clearInterval(interval);
             }
          },
          error: function (_jqXhr: any, _textStatus: string, errorMessage: string) {
@@ -238,8 +239,6 @@ function startServer() {
          }
       });
    }, 3000);
-
-   clearInterval(interval);
 
    let client_keys: Set<string> = new Set();
    p.on('data', (data: string) => {
