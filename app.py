@@ -38,5 +38,8 @@ def accept_conn(num):
     global conn_info 
     conn_info[num][1]=request.form['c_info']
     return 'success!!'
+@app.route('/room/<num>/getaccept',methods=['POST'])
+def get_accept(num):
+    return conn_info[num][1]
 if __name__=='__main__':
     app.run(host="0.0.0.0", port=80)
