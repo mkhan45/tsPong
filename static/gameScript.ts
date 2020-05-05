@@ -199,10 +199,10 @@ function setupConnections(p: any) {
       });
    })
 
-   document.querySelector('#connectForm').addEventListener('submit', (ev: any) => {
-      ev.preventDefault()
-      /* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); */
-   })
+   /* document.querySelector('#connectForm').addEventListener('submit', (ev: any) => { */
+   /*    ev.preventDefault() */
+   /*    /1* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); *1/ */
+   /* }) */
 
    //async for the Promise
    p.on('connect', async () => {

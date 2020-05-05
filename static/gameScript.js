@@ -206,10 +206,10 @@ function setupConnections(p) {
             }
         });
     });
-    document.querySelector('#connectForm').addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        /* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); */
-    });
+    /* document.querySelector('#connectForm').addEventListener('submit', (ev: any) => { */
+    /*    ev.preventDefault() */
+    /*    /1* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); *1/ */
+    /* }) */
     //async for the Promise
     p.on('connect', function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
