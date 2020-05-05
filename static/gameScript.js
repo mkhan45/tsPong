@@ -192,20 +192,6 @@ document.onkeyup = function (event) {
 function setupConnections(p) {
     var _this = this;
     p.on('error', function (err) { return console.log('error', err); });
-    p.on('signal', function (data) {
-        console.log('SIGNAL', JSON.stringify(data));
-        // send data to server
-        $.ajax('signal', {
-            type: 'POST',
-            data: { c_info: JSON.stringify(data) },
-            success: function (data, status, xhr) {
-                console.log('status: ' + status + ', data: ' + data);
-            },
-            error: function (jqXhr, textStatus, errorMessage) {
-                console.log('Error: ' + errorMessage);
-            }
-        });
-    });
     /* document.querySelector('#connectForm').addEventListener('submit', (ev: any) => { */
     /*    ev.preventDefault() */
     /*    /1* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); *1/ */
@@ -232,6 +218,38 @@ function startServer() {
         config: { iceServers: iceServers },
     });
     setupConnections(p);
+    p.on('signal', function (data) {
+        console.log('SIGNAL', JSON.stringify(data));
+        // send data to server
+        $.ajax('signal', {
+            type: 'POST',
+            data: { c_info: JSON.stringify(data) },
+            success: function (data, status, _xhr) {
+                console.log('status: ' + status + ', data: ' + data);
+            },
+            error: function (_jqXhr, _textStatus, errorMessage) {
+                console.log('Error: ' + errorMessage);
+            }
+        });
+    });
+    var interval = setInterval(function () {
+        $.ajax('getaccept', {
+            type: 'GET',
+            success: function (data, status, _xhr) {
+                console.log('status: ' + status + ', data: ' + data);
+                if (data == null) {
+                    console.log("no clients connected");
+                }
+                else {
+                    p.signal(data);
+                }
+            },
+            error: function (_jqXhr, _textStatus, errorMessage) {
+                console.log('Error: ' + errorMessage);
+            }
+        });
+    }, 3000);
+    clearInterval(interval);
     var client_keys = new Set();
     p.on('data', function (data) {
         client_keys = new Set(JSON.parse(data));
@@ -267,6 +285,30 @@ function startClient() {
         reconnectTimer: 15000,
     });
     setupConnections(p);
+    $.ajax('getsignal', {
+        type: 'GET',
+        success: function (data, status, xhr) {
+            console.log(data);
+            p.signal(data);
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+            console.log('Error: ' + errorMessage);
+        }
+    });
+    p.on('signal', function (data) {
+        console.log('SIGNAL', JSON.stringify(data));
+        // send data to server
+        $.ajax('accept', {
+            type: 'POST',
+            data: { c_info: JSON.stringify(data) },
+            success: function (data, status, xhr) {
+                console.log('status: ' + status + ', data: ' + data);
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log('Error: ' + errorMessage);
+            }
+        });
+    });
     // let initiator signal = (get from server)
     // p.signal(signal)
     p.on('data', function (data) {

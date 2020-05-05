@@ -184,20 +184,6 @@ document.onkeyup = (event: KeyboardEvent) => {
 function setupConnections(p: any) {
    p.on('error', (err: Error) => console.log('error', err))
 
-   p.on('signal', (data: string | JSON) => {
-      console.log('SIGNAL', JSON.stringify(data));
-      // send data to server
-      $.ajax('signal', {
-         type: 'POST',  // http method
-         data: { c_info: JSON.stringify(data) },  // data to submit
-         success: function (data, status, xhr) {
-            console.log('status: ' + status + ', data: ' + data);
-         },
-         error: function (jqXhr, textStatus, errorMessage) {
-            console.log('Error: ' + errorMessage);
-         }
-      });
-   })
 
    /* document.querySelector('#connectForm').addEventListener('submit', (ev: any) => { */
    /*    ev.preventDefault() */
@@ -220,6 +206,40 @@ function startServer() {
    });
 
    setupConnections(p);
+
+   p.on('signal', (data: string | JSON) => {
+      console.log('SIGNAL', JSON.stringify(data));
+      // send data to server
+      $.ajax('signal', {
+         type: 'POST',  // http method
+         data: { c_info: JSON.stringify(data) },  // data to submit
+         success: function (data: string, status: string, _xhr: any) {
+            console.log('status: ' + status + ', data: ' + data);
+         },
+         error: function (_jqXhr: any, _textStatus: string, errorMessage: string) {
+            console.log('Error: ' + errorMessage);
+         }
+      });
+   })
+
+   let interval = setInterval(() => {
+      $.ajax('getaccept', {
+         type: 'GET',  // http method
+         success: function (data: string, status: string, _xhr: any) {
+            console.log('status: ' + status + ', data: ' + data);
+            if (data == null) {
+               console.log("no clients connected");
+            } else {
+               p.signal(data);
+            }
+         },
+         error: function (_jqXhr: any, _textStatus: string, errorMessage: string) {
+            console.log('Error: ' + errorMessage);
+         }
+      });
+   }, 3000);
+
+   clearInterval(interval);
 
    let client_keys: Set<string> = new Set();
    p.on('data', (data: string) => {
@@ -260,6 +280,32 @@ function startClient() {
       reconnectTimer: 15000,
    });
    setupConnections(p);
+
+   $.ajax('getsignal', {
+      type: 'GET',  // http method
+      success: function (data, status, xhr) {
+         console.log(data);
+         p.signal(data);
+      },
+      error: function (jqXhr, textStatus, errorMessage) {
+         console.log('Error: ' + errorMessage);
+      }
+   });
+
+   p.on('signal', (data: string | JSON) => {
+      console.log('SIGNAL', JSON.stringify(data));
+      // send data to server
+      $.ajax('accept', {
+         type: 'POST',  // http method
+         data: { c_info: JSON.stringify(data) },  // data to submit
+         success: function (data, status, xhr) {
+            console.log('status: ' + status + ', data: ' + data);
+         },
+         error: function (jqXhr, textStatus, errorMessage) {
+            console.log('Error: ' + errorMessage);
+         }
+      });
+   })
 
    // let initiator signal = (get from server)
    // p.signal(signal)
