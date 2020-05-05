@@ -1,5 +1,5 @@
 declare var SimplePeer: any;
-/* declare var $: any; */
+declare var $: any;
 
 class Rectangle {
    x: number;
@@ -181,18 +181,27 @@ document.onkeyup = (event: KeyboardEvent) => {
 // 4. client sends new signal data to server
 // 5. on next check in initiator recieves client's signal data and connection is complete
 
-let $ = document.querySelector;
-
 function setupConnections(p: any) {
    p.on('error', (err: Error) => console.log('error', err))
+
    p.on('signal', (data: string | JSON) => {
       console.log('SIGNAL', JSON.stringify(data));
-      (<HTMLInputElement> document.querySelector('#outgoing')).value = JSON.stringify(data)
       // send data to server
+      $.ajax('signal', {
+         type: 'POST',  // http method
+         data: { myData: 'This is my data.' },  // data to submit
+         success: function (data, status, xhr) {
+            console.log('status: ' + status + ', data: ' + data);
+         },
+         error: function (jqXhr, textStatus, errorMessage) {
+            console.log('Error' + errorMessage);
+         }
+      });
    })
+
    document.querySelector('#connectForm').addEventListener('submit', (ev: any) => {
       ev.preventDefault()
-      p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value);
+      /* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); */
    })
 
    //async for the Promise
