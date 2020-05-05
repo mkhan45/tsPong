@@ -194,12 +194,21 @@ function setupConnections(p) {
     p.on('error', function (err) { return console.log('error', err); });
     p.on('signal', function (data) {
         console.log('SIGNAL', JSON.stringify(data));
-        document.querySelector('#outgoing').value = JSON.stringify(data);
         // send data to server
+        $.ajax('signal', {
+            type: 'POST',
+            data: { myData: 'This is my data.' },
+            success: function (data, status, xhr) {
+                console.log('status: ' + status + ', data: ' + data);
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log('Error' + errorMessage);
+            }
+        });
     });
     document.querySelector('#connectForm').addEventListener('submit', function (ev) {
         ev.preventDefault();
-        p.signal(document.querySelector('#outMessage').value);
+        /* p.signal((<HTMLInputElement> document.querySelector('#outMessage')).value); */
     });
     //async for the Promise
     p.on('connect', function () { return __awaiter(_this, void 0, void 0, function () {
@@ -258,6 +267,8 @@ function startClient() {
         reconnectTimer: 15000,
     });
     setupConnections(p);
+    // let initiator signal = (get from server)
+    // p.signal(signal)
     p.on('data', function (data) {
         game_instance.game_data = SerializationHelper.toInstance(new GameData(), data);
     });
