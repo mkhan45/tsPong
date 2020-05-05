@@ -54,36 +54,6 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var iceServers = [
-    'stun:stun.l.google.com:19302',
-    'stun:global.stun.twilio.com:3478?transport=udp',
-    'stun:stun4.l.google.com:19302',
-    'stun:stun.sipnet.net:3478',
-].map(function (url) {
-    return { urls: url };
-});
-function copyOutgoing() {
-    var text = document.querySelector("#outgoing");
-    text.select();
-    document.execCommand("copy");
-}
-var SerializationHelper = /** @class */ (function () {
-    function SerializationHelper() {
-    }
-    SerializationHelper.toInstance = function (obj, json) {
-        var jsonObj = JSON.parse(json);
-        if (typeof obj["fromJSON"] === "function") {
-            obj["fromJSON"](jsonObj);
-        }
-        else {
-            for (var propName in jsonObj) {
-                obj[propName] = jsonObj[propName];
-            }
-        }
-        return obj;
-    };
-    return SerializationHelper;
-}());
 var Rectangle = /** @class */ (function () {
     function Rectangle(x, y, w, h) {
         this.x = x;
@@ -182,6 +152,31 @@ var GameInstance = /** @class */ (function () {
     };
     return GameInstance;
 }());
+var iceServers = [
+    'stun:stun.l.google.com:19302',
+    'stun:global.stun.twilio.com:3478?transport=udp',
+    'stun:stun4.l.google.com:19302',
+    'stun:stun.sipnet.net:3478',
+].map(function (url) {
+    return { urls: url };
+});
+var SerializationHelper = /** @class */ (function () {
+    function SerializationHelper() {
+    }
+    SerializationHelper.toInstance = function (obj, json) {
+        var jsonObj = JSON.parse(json);
+        if (typeof obj["fromJSON"] === "function") {
+            obj["fromJSON"](jsonObj);
+        }
+        else {
+            for (var propName in jsonObj) {
+                obj[propName] = jsonObj[propName];
+            }
+        }
+        return obj;
+    };
+    return SerializationHelper;
+}());
 var game_instance = new GameInstance();
 document.onkeydown = function (event) {
     game_instance.game_data.pressed_keys.add(event.key);
@@ -189,12 +184,18 @@ document.onkeydown = function (event) {
 document.onkeyup = function (event) {
     game_instance.game_data.pressed_keys.delete(event.key);
 };
+// 1. initiator presses start server and sends signal data to server
+// 2. server creates a room and stores signal data, initiator sets interval to check server
+// 3. client requests room number and recieves signal data
+// 4. client sends new signal data to server
+// 5. on next check in initiator recieves client's signal data and connection is complete
 function setupConnections(p) {
     var _this = this;
     p.on('error', function (err) { return console.log('error', err); });
     p.on('signal', function (data) {
         console.log('SIGNAL', JSON.stringify(data));
         document.querySelector('#outgoing').value = JSON.stringify(data);
+        // send data to server
     });
     document.querySelector('#connectForm').addEventListener('submit', function (ev) {
         ev.preventDefault();
@@ -272,4 +273,9 @@ function startClient() {
         p.send(JSON.stringify(Array.from(pressed_keys)));
     };
     setInterval(gameLoop, 16);
+}
+function copyOutgoing() {
+    var text = document.querySelector("#outgoing");
+    text.select();
+    document.execCommand("copy");
 }

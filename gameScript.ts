@@ -1,37 +1,5 @@
 declare var SimplePeer: any;
-
-let iceServers: {urls : string}[] = [
-   'stun:stun.l.google.com:19302',
-   'stun:global.stun.twilio.com:3478?transport=udp',
-   'stun:stun4.l.google.com:19302',
-   'stun:stun.sipnet.net:3478',
-].map((url: string) => {
-   return { urls: url };
-});
-
-
-function copyOutgoing() {
-   let text = <HTMLInputElement> document.querySelector("#outgoing");
-   text.select();
-   document.execCommand("copy");
-}
-
-class SerializationHelper {
-   static toInstance<T>(obj: T, json: string) : T {
-      var jsonObj = JSON.parse(json);
-
-      if (typeof obj["fromJSON"] === "function") {
-         obj["fromJSON"](jsonObj);
-      }
-      else {
-         for (var propName in jsonObj) {
-            obj[propName] = jsonObj[propName]
-         }
-      }
-
-      return obj;
-   }
-}
+/* declare var $: any; */
 
 class Rectangle {
    x: number;
@@ -171,21 +139,56 @@ class GameInstance {
    }
 }
 
-let game_instance = new GameInstance();
 
+let iceServers: {urls : string}[] = [
+   'stun:stun.l.google.com:19302',
+   'stun:global.stun.twilio.com:3478?transport=udp',
+   'stun:stun4.l.google.com:19302',
+   'stun:stun.sipnet.net:3478',
+].map((url: string) => {
+   return { urls: url };
+});
+
+
+class SerializationHelper {
+   static toInstance<T>(obj: T, json: string) : T {
+      var jsonObj = JSON.parse(json);
+
+      if (typeof obj["fromJSON"] === "function") {
+         obj["fromJSON"](jsonObj);
+      }
+      else {
+         for (var propName in jsonObj) {
+            obj[propName] = jsonObj[propName]
+         }
+      }
+
+      return obj;
+   }
+}
+
+let game_instance = new GameInstance();
 document.onkeydown = (event: KeyboardEvent) => {
    game_instance.game_data.pressed_keys.add(event.key);
 }
-
 document.onkeyup = (event: KeyboardEvent) => {
    game_instance.game_data.pressed_keys.delete(event.key);
 }
+
+// 1. initiator presses start server and sends signal data to server
+// 2. server creates a room and stores signal data, initiator sets interval to check server
+// 3. client requests room number and recieves signal data
+// 4. client sends new signal data to server
+// 5. on next check in initiator recieves client's signal data and connection is complete
+
+let $ = document.querySelector;
 
 function setupConnections(p: any) {
    p.on('error', (err: Error) => console.log('error', err))
    p.on('signal', (data: string | JSON) => {
       console.log('SIGNAL', JSON.stringify(data));
       (<HTMLInputElement> document.querySelector('#outgoing')).value = JSON.stringify(data)
+      // send data to server
    })
    document.querySelector('#connectForm').addEventListener('submit', (ev: any) => {
       ev.preventDefault()
@@ -249,6 +252,9 @@ function startClient() {
    });
    setupConnections(p);
 
+   // let initiator signal = (get from server)
+   // p.signal(signal)
+
    p.on('data', (data: string) => {
       game_instance.game_data = SerializationHelper.toInstance(new GameData(), data);
    })
@@ -268,4 +274,10 @@ function startClient() {
    }
 
    setInterval(gameLoop, 16);
+}
+
+function copyOutgoing() {
+   let text = <HTMLInputElement> document.querySelector("#outgoing");
+   text.select();
+   document.execCommand("copy");
 }

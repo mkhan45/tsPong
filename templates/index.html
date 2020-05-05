@@ -8,25 +8,24 @@
 
    <body>
       <div class="row">
-         <div class="col-6">
-	    <a class="btn btn-primary" onclick="startServer()">Initiator</a>
+         <div class="col-2">
+	    <a class="btn btn-primary" onclick="location.href='create_room'">Host Game</a>
          </div>
-         <div class="col-6">
-	    <a class="btn btn-primary" onclick="startClient()">Receiver</a>
+         <div class="col-2">
+               <script>
+                  function joinRoom() {
+                     var text = $("#roomText").val();
+                     location.href = 'room/' + text;
+                  }
+               </script>
+	    <a class="btn btn-primary" onclick="joinRoom()">Join Game</a>
+            <input id="roomText"></input>
          </div>
+         <div class="col-8"> </div>
       </div>
       <canvas id="gameCanvas" width="500" height="500"></canvas>
       <pre id="scoreText">Left: 0, Right: 0</pre>
       
-      <form id="connectForm">
-         <textarea id="outMessage"></textarea>
-         <button type="submit">send</button>
-      </form>
-
-      <input id="outgoing" style="width: 50em; word-wrap: break-word"></input>
-      <button onclick="copyOutgoing()">Copy message</button>
-
-
       <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.0/simplepeer.min.js"></script>
       <script src="gameScript.js"></script>
       <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
