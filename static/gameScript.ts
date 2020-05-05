@@ -249,14 +249,15 @@ function startServer() {
       game_instance.gameLoop()
 
       if (game_instance.running) {
-         let pressed_keys = new Set([...client_keys, ...game_instance.game_data.pressed_keys]);
-         pressed_keys.forEach( (key: string) => {
+         client_keys.forEach((key: string) => {
             if (key == "w") {
                game_instance.game_data.lPaddle.y -= 10;
             } else if (key == "s") {
                game_instance.game_data.lPaddle.y += 10;
             }
+         });
 
+         game_instance.game_data.pressed_keys.forEach((key: string) => {
             if (key == "ArrowUp") {
                game_instance.game_data.rPaddle.y -= 10;
             } else if (key == "ArrowDown") {
@@ -282,11 +283,11 @@ function startClient() {
 
    $.ajax('getsignal', {
       type: 'GET',  // http method
-      success: function (data: string, status, xhr) {
+      success: function (data: string, _status: string, _xhr: any) {
          console.log(data);
          p.signal(data);
       },
-      error: function (jqXhr, textStatus, errorMessage) {
+      error: function (_jqXhr: any, _textStatus: string, errorMessage: string) {
          console.log('Error: ' + errorMessage);
       }
    });
@@ -297,10 +298,10 @@ function startClient() {
       $.ajax('accept', {
          type: 'POST',  // http method
          data: { c_info: JSON.stringify(data) },  // data to submit
-         success: function (data, status, xhr) {
+         success: function (data: string, status: string, _xhr: any) {
             console.log('status: ' + status + ', data: ' + data);
          },
-         error: function (jqXhr, textStatus, errorMessage) {
+         error: function (_jqXhr: any, _textStatus: string, errorMessage: string) {
             console.log('Error: ' + errorMessage);
          }
       });

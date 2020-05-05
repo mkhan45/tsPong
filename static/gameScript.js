@@ -34,26 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
 var Rectangle = /** @class */ (function () {
     function Rectangle(x, y, w, h) {
         this.x = x;
@@ -257,14 +237,15 @@ function startServer() {
     var gameLoop = function () {
         game_instance.gameLoop();
         if (game_instance.running) {
-            var pressed_keys = new Set(__spread(client_keys, game_instance.game_data.pressed_keys));
-            pressed_keys.forEach(function (key) {
+            client_keys.forEach(function (key) {
                 if (key == "w") {
                     game_instance.game_data.lPaddle.y -= 10;
                 }
                 else if (key == "s") {
                     game_instance.game_data.lPaddle.y += 10;
                 }
+            });
+            game_instance.game_data.pressed_keys.forEach(function (key) {
                 if (key == "ArrowUp") {
                     game_instance.game_data.rPaddle.y -= 10;
                 }
@@ -287,11 +268,11 @@ function startClient() {
     setupConnections(p);
     $.ajax('getsignal', {
         type: 'GET',
-        success: function (data, status, xhr) {
+        success: function (data, _status, _xhr) {
             console.log(data);
             p.signal(data);
         },
-        error: function (jqXhr, textStatus, errorMessage) {
+        error: function (_jqXhr, _textStatus, errorMessage) {
             console.log('Error: ' + errorMessage);
         }
     });
@@ -301,10 +282,10 @@ function startClient() {
         $.ajax('accept', {
             type: 'POST',
             data: { c_info: JSON.stringify(data) },
-            success: function (data, status, xhr) {
+            success: function (data, status, _xhr) {
                 console.log('status: ' + status + ', data: ' + data);
             },
-            error: function (jqXhr, textStatus, errorMessage) {
+            error: function (_jqXhr, _textStatus, errorMessage) {
                 console.log('Error: ' + errorMessage);
             }
         });
