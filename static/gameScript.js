@@ -237,7 +237,7 @@ function startServer() {
             type: 'GET',
             success: function (data, status, _xhr) {
                 console.log('status: ' + status + ', data: ' + data);
-                if (data == null) {
+                if (data == "null") {
                     console.log("no clients connected");
                 }
                 else {

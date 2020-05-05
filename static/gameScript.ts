@@ -227,7 +227,7 @@ function startServer() {
          type: 'GET',  // http method
          success: function (data: string, status: string, _xhr: any) {
             console.log('status: ' + status + ', data: ' + data);
-            if (data == null) {
+            if (data == "null") {
                console.log("no clients connected");
             } else {
                p.signal(data);
@@ -282,7 +282,7 @@ function startClient() {
 
    $.ajax('getsignal', {
       type: 'GET',  // http method
-      success: function (data, status, xhr) {
+      success: function (data: string, status, xhr) {
          console.log(data);
          p.signal(data);
       },
