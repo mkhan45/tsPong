@@ -49,6 +49,12 @@ var Rectangle = /** @class */ (function () {
         this.x += x_vel;
         this.y += y_vel;
     };
+    Rectangle.prototype.top = function () {
+        return this.y;
+    };
+    Rectangle.prototype.bottom = function () {
+        return this.y + this.height;
+    };
     Rectangle.prototype.overlaps = function (other) {
         return this.x < other.x + other.width &&
             this.x + this.width > other.x &&
@@ -121,6 +127,10 @@ var GameInstance = /** @class */ (function () {
         this.drawRect(this.game_data.lPaddle);
         this.drawRect(this.game_data.rPaddle);
         this.drawRect(this.game_data.ball);
+        this.drawRect(new Rectangle(0, 0, 500, 1.5)); //top edge
+        this.drawRect(new Rectangle(0, 498.5, 500, 1.5)); //bottom edge
+        this.drawRect(new Rectangle(0, 0, 1.5, 500)); //left edge
+        this.drawRect(new Rectangle(498.5, 0, 1.5, 500)); //right edge
         this.ctx.fillStyle = "#000000";
         this.ctx.fill();
         this.ctx.closePath();
@@ -242,18 +252,18 @@ function startServer() {
         game_instance.gameLoop();
         if (game_instance.running) {
             client_keys.forEach(function (key) {
-                if (key == "w") {
+                if (key.toLowerCase() == "w" && game_instance.game_data.lPaddle.top() > 0) {
                     game_instance.game_data.lPaddle.y -= 10;
                 }
-                else if (key == "s") {
+                else if (key.toLowerCase() == "s" && game_instance.game_data.lPaddle.bottom() < 500) {
                     game_instance.game_data.lPaddle.y += 10;
                 }
             });
             game_instance.game_data.pressed_keys.forEach(function (key) {
-                if (key == "ArrowUp") {
+                if (key == "ArrowUp" && game_instance.game_data.rPaddle.top() > 0) {
                     game_instance.game_data.rPaddle.y -= 10;
                 }
-                else if (key == "ArrowDown") {
+                else if (key == "ArrowDown" && game_instance.game_data.rPaddle.bottom() < 500) {
                     game_instance.game_data.rPaddle.y += 10;
                 }
             });

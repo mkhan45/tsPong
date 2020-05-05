@@ -24,6 +24,14 @@ class Rectangle {
       this.y += y_vel;
    }
 
+   public top(): number {
+      return this.y;
+   }
+
+   public bottom(): number {
+      return this.y + this.height;
+   }
+
    public overlaps(other: Rectangle) {
       return this.x < other.x + other.width &&
          this.x + this.width > other.x &&
@@ -123,9 +131,16 @@ class GameInstance {
    public draw() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.beginPath();
+
       this.drawRect(this.game_data.lPaddle);
       this.drawRect(this.game_data.rPaddle);
       this.drawRect(this.game_data.ball);
+
+      this.drawRect(new Rectangle(0, 0, 500, 1.5)); //top edge
+      this.drawRect(new Rectangle(0, 498.5, 500, 1.5)); //bottom edge
+      this.drawRect(new Rectangle(0, 0, 1.5, 500)); //left edge
+      this.drawRect(new Rectangle(498.5, 0, 1.5, 500)); //right edge
+
       this.ctx.fillStyle = "#000000";
       this.ctx.fill();
       this.ctx.closePath();
@@ -255,17 +270,17 @@ function startServer() {
 
       if (game_instance.running) {
          client_keys.forEach((key: string) => {
-            if (key == "w") {
+            if (key.toLowerCase() == "w" && game_instance.game_data.lPaddle.top() > 0) {
                game_instance.game_data.lPaddle.y -= 10;
-            } else if (key == "s") {
+            } else if (key.toLowerCase() == "s" && game_instance.game_data.lPaddle.bottom() < 500) {
                game_instance.game_data.lPaddle.y += 10;
             }
          });
 
          game_instance.game_data.pressed_keys.forEach((key: string) => {
-            if (key == "ArrowUp") {
+            if (key == "ArrowUp" && game_instance.game_data.rPaddle.top() > 0) {
                game_instance.game_data.rPaddle.y -= 10;
-            } else if (key == "ArrowDown") {
+            } else if (key == "ArrowDown" && game_instance.game_data.rPaddle.bottom() < 500) {
                game_instance.game_data.rPaddle.y += 10;
             }
          });
