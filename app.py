@@ -15,5 +15,12 @@ def create():
     room_id_counter+=1
     return redirect(url)
 
+@app.route('/room/<num>/initiator')
+def initiator():
+    return render_template('initiator.html')
+
+@app.route('/room/<num>/observer')
+    return render_template('observer.html')
+
 if __name__=='__main__':
     app.run(host="0.0.0.0", port=80)
