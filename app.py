@@ -30,7 +30,7 @@ def signal(num):
     conn_info[num]=['' for _ in range(2)]
     conn_info[num][0]=request.form['c_info']
     return 'success!!'
-@app.route('/room/<num>/getsignal',methods=['POST'])
+@app.route('/room/<num>/getsignal')
 def getsignal(num):
     return conn_info[num][0]
 @app.route('/room/<num>/accept',methods=['POST'])
@@ -38,8 +38,8 @@ def accept_conn(num):
     global conn_info 
     conn_info[num][1]=request.form['c_info']
     return 'success!!'
-@app.route('/room/<num>/getaccept',methods=['POST'])
+@app.route('/room/<num>/getaccept')
 def get_accept(num):
-    return conn_info[num][1]
+    return conn_info[num][1] if  conn_info[num][1] else  'null'
 if __name__=='__main__':
     app.run(host="0.0.0.0", port=80)
