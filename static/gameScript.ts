@@ -189,12 +189,12 @@ function setupConnections(p: any) {
       // send data to server
       $.ajax('signal', {
          type: 'POST',  // http method
-         data: { myData: 'This is my data.' },  // data to submit
+         data: { c_info: JSON.stringify(data) },  // data to submit
          success: function (data, status, xhr) {
             console.log('status: ' + status + ', data: ' + data);
          },
          error: function (jqXhr, textStatus, errorMessage) {
-            console.log('Error' + errorMessage);
+            console.log('Error: ' + errorMessage);
          }
       });
    })
