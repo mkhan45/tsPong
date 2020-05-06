@@ -156,6 +156,13 @@ class GameInstance {
       this.game_data.ball = new Rectangle(240, 240, 15, 15);
       this.ball_x_vel = secureRandomNumber() * 3.0 + 3.0;
       this.ball_y_vel = secureRandomNumber() * 3.0 + 3.0;
+
+      if (Math.random() < 0.5) {
+         this.ball_x_vel *= -1;
+      }
+      if (Math.random() < 0.5) {
+         this.ball_y_vel *= -1;
+      }
    }
 }
 
