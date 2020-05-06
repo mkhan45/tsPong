@@ -34,10 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-function secureRandomNumber() {
-    var array = new Uint32Array(1);
-    return window.crypto.getRandomValues(array)[0] / 2147483647 / 2;
-}
 var Rectangle = /** @class */ (function () {
     function Rectangle(x, y, w, h) {
         this.x = x;
@@ -105,8 +101,10 @@ var GameInstance = /** @class */ (function () {
                     _this.ball_y_vel *= -1;
                 }
                 if ((_this.game_data.ball.overlaps(_this.game_data.lPaddle) && _this.ball_x_vel < 0)
-                    || (_this.game_data.ball.overlaps(_this.game_data.rPaddle) && _this.ball_x_vel > 0))
-                    _this.ball_x_vel *= -1;
+                    || (_this.game_data.ball.overlaps(_this.game_data.rPaddle) && _this.ball_x_vel > 0)) {
+                    _this.ball_x_vel *= -(1 + (Math.random() * 0.5 - 0.25)); //random from -0.5 to 0.5
+                    _this.ball_y_vel *= (Math.random() * 0.5) + 0.75; //random from 0.75 to 1.25
+                }
             }
         };
         this.game_data = new GameData();
@@ -114,11 +112,11 @@ var GameInstance = /** @class */ (function () {
         this.ctx = this.canvas.getContext("2d");
         this.scoreText = document.getElementById("scoreText");
         this.running = false;
-        this.ball_x_vel = secureRandomNumber() * 3.0 + 3.0;
-        this.ball_y_vel = secureRandomNumber() * 3.0 + 3.0;
-        if (secureRandomNumber() > 0.5)
+        this.ball_x_vel = Math.random() * 3.0 + 3.0;
+        this.ball_y_vel = Math.random() * 3.0 + 3.0;
+        if (Math.random() > 0.5)
             this.ball_x_vel *= -1;
-        if (secureRandomNumber() > 0.5)
+        if (Math.random() > 0.5)
             this.ball_y_vel *= -1;
     }
     GameInstance.prototype.draw = function () {
@@ -140,15 +138,26 @@ var GameInstance = /** @class */ (function () {
         this.ctx.rect(rect.x, rect.y, rect.width, rect.height);
     };
     GameInstance.prototype.resetBall = function () {
-        this.game_data.ball = new Rectangle(240, 240, 15, 15);
-        this.ball_x_vel = secureRandomNumber() * 3.0 + 3.0;
-        this.ball_y_vel = secureRandomNumber() * 3.0 + 3.0;
-        if (Math.random() < 0.5) {
-            this.ball_x_vel *= -1;
-        }
-        if (Math.random() < 0.5) {
-            this.ball_y_vel *= -1;
-        }
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.game_data.ball = new Rectangle(240, 240, 15, 15);
+                        this.ball_x_vel = Math.random() * 3.0 + 3.0;
+                        this.ball_y_vel = Math.random() * 3.0 + 3.0;
+                        if (Math.random() < 0.5) {
+                            this.ball_x_vel *= -1;
+                        }
+                        if (Math.random() < 0.5) {
+                            this.ball_y_vel *= -1;
+                        }
+                        return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, 2500); })];
+                    case 1:
+                        _a.sent(); //sleep 2500ms
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     return GameInstance;
 }());
