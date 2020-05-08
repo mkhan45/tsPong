@@ -140,22 +140,16 @@ var GameInstance = /** @class */ (function () {
     GameInstance.prototype.resetBall = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.game_data.ball = new Rectangle(240, 240, 15, 15);
-                        this.ball_x_vel = Math.random() * 3.0 + 3.0;
-                        this.ball_y_vel = Math.random() * 3.0 + 3.0;
-                        if (Math.random() < 0.5) {
-                            this.ball_x_vel *= -1;
-                        }
-                        if (Math.random() < 0.5) {
-                            this.ball_y_vel *= -1;
-                        }
-                        return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, 2500); })];
-                    case 1:
-                        _a.sent(); //sleep 2500ms
-                        return [2 /*return*/];
+                this.game_data.ball = new Rectangle(240, 240, 15, 15);
+                this.ball_x_vel = Math.random() * 3.0 + 3.0;
+                this.ball_y_vel = Math.random() * 3.0 + 3.0;
+                if (Math.random() < 0.5) {
+                    this.ball_x_vel *= -1;
                 }
+                if (Math.random() < 0.5) {
+                    this.ball_y_vel *= -1;
+                }
+                return [2 /*return*/];
             });
         });
     };
@@ -169,23 +163,6 @@ var iceServers = [
 ].map(function (url) {
     return { urls: url };
 });
-var SerializationHelper = /** @class */ (function () {
-    function SerializationHelper() {
-    }
-    SerializationHelper.toInstance = function (obj, json) {
-        var jsonObj = JSON.parse(json);
-        if (typeof obj["fromJSON"] === "function") {
-            obj["fromJSON"](jsonObj);
-        }
-        else {
-            for (var propName in jsonObj) {
-                obj[propName] = jsonObj[propName];
-            }
-        }
-        return obj;
-    };
-    return SerializationHelper;
-}());
 var game_instance = new GameInstance();
 document.onkeydown = function (event) {
     game_instance.game_data.pressed_keys.add(event.key);
@@ -322,7 +299,8 @@ function startClient() {
     // let initiator signal = (get from server)
     // p.signal(signal)
     p.on('data', function (data) {
-        game_instance.game_data = SerializationHelper.toInstance(new GameData(), data);
+        /* game_instance.game_data = SerializationHelper.toInstance(new GameData(), data); */
+        game_instance.game_data = JSON.parse(data);
     });
     var pressed_keys = new Set();
     document.onkeydown = function (event) {

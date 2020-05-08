@@ -160,7 +160,6 @@ class GameInstance {
       if (Math.random() < 0.5) {
          this.ball_y_vel *= -1;
       }
-      await new Promise(r => setTimeout(r, 2500)); //sleep 2500ms
    }
 }
 
@@ -173,24 +172,6 @@ let iceServers: {urls : string}[] = [
 ].map((url: string) => {
    return { urls: url };
 });
-
-
-class SerializationHelper {
-   static toInstance<T>(obj: T, json: string) : T {
-      var jsonObj = JSON.parse(json);
-
-      if (typeof obj["fromJSON"] === "function") {
-         obj["fromJSON"](jsonObj);
-      }
-      else {
-         for (var propName in jsonObj) {
-            obj[propName] = jsonObj[propName]
-         }
-      }
-
-      return obj;
-   }
-}
 
 let game_instance = new GameInstance();
 document.onkeydown = (event: KeyboardEvent) => {
@@ -336,7 +317,8 @@ function startClient() {
    // p.signal(signal)
 
    p.on('data', (data: string) => {
-      game_instance.game_data = SerializationHelper.toInstance(new GameData(), data);
+      /* game_instance.game_data = SerializationHelper.toInstance(new GameData(), data); */
+      game_instance.game_data = <GameData> JSON.parse(data);
    })
 
    let pressed_keys: Set<string> = new Set();
